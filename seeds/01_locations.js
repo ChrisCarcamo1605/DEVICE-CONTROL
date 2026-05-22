@@ -1,11 +1,15 @@
 exports.seed = async (knex) => {
-  await knex('locations').del();
-  await knex('locations').insert([
-    { name: 'Tegucigalpa',  department: 'Francisco Morazán',  country: 'Honduras' },
-    { name: 'San Pedro Sula', department: 'Cortés', country: 'Honduras' },
-    { name: 'Choloma', department: 'Cortés', country: 'Honduras' },
-    { name: 'Comayagua', department: 'Comayagua', country: 'Honduras' },
-    { name: 'La Ceiba', department: 'Atlántida', country: 'Honduras' },
-    { name: 'Santa Rosa de Copán', department: 'Copán', country: 'Honduras' },
-  ]);
+  const rows = [
+    { name: 'San Salvador', department: 'San Salvador', country: 'El Salvador' },
+    { name: 'Santa Ana',    department: 'Santa Ana',    country: 'El Salvador' },
+    { name: 'San Miguel',   department: 'San Miguel',   country: 'El Salvador' },
+    { name: 'Apopa',        department: 'San Salvador', country: 'El Salvador' },
+  ];
+
+  const existing = await knex('locations').select('name');
+  const existingNames = new Set(existing.map(l => l.name));
+  const toInsert = rows.filter(r => !existingNames.has(r.name));
+
+  if (toInsert.length) await knex('locations').insert(toInsert);
+  console.log(`  locations: ${toInsert.length} insertadas, ${existing.length} ya existían`);
 };
