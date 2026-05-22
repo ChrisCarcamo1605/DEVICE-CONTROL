@@ -1,0 +1,88 @@
+<div class="page-header">
+  <h1><i class="bi bi-cart3 me-2"></i>Compras</h1>
+  <a href="/purchases/new" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Registrar compra
+  </a>
+</div>
+
+<!-- Filtros -->
+<form method="GET" action="/purchases" class="content-card mb-3 p-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Sucursal</label>
+      <select name="branch_id" class="form-select form-select-sm">
+        <option value="">Todas</option>
+        <% branches.forEach(b => { %>
+          <option value="<%= b.id %>" <%= filters.branch_id === b.id ? 'selected' : '' %>><%= b.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Tipo</label>
+      <select name="type" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        <option value="spare_part"  <%= filters.type === 'spare_part'  ? 'selected' : '' %>>Repuesto</option>
+        <option value="new_device"  <%= filters.type === 'new_device'  ? 'selected' : '' %>>Equipo nuevo</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <button type="submit" class="btn btn-secondary btn-sm w-100">Filtrar</button>
+    </div>
+    <div class="col-sm-1">
+      <a href="/purchases" class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-x-lg"></i></a>
+    </div>
+    <div class="col-sm-3 text-end">
+      <small class="text-muted">Total filtrado:</small>
+      <strong style="color:var(--btn-primary);">$ <%= total.toLocaleString('en-US', {minimumFractionDigits:2}) %></strong>
+    </div>
+  </div>
+</form>
+
+<div class="content-card">
+  <% if (purchases.length === 0) { %>
+    <p class="text-muted mb-0">No hay compras registradas.</p>
+  <% } else { %>
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Descripción</th>
+        <th>Tipo</th>
+        <th>Sucursal destino</th>
+        <th>Ticket</th>
+        <th>Monto</th>
+        <th>Fecha</th>
+        <th>Manager</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% purchases.forEach(p => { %>
+      <tr>
+        <td class="fw-semibold"><%= p.description %></td>
+        <td>
+          <span class="badge" style="background-color:<%= p.type === 'new_device' ? 'var(--btn-primary)' : 'var(--btn-secondary)' %>;">
+            <%= TYPE_LABELS[p.type] %>
+          </span>
+        </td>
+        <td><%= p.branch_name %></td>
+        <td>
+          <% if (p.ticket_ref) { %>
+            <a href="/tickets/<%= p.ticket_ref %>" class="action-link">
+              <i class="bi bi-ticket me-1"></i><%= p.ticket_device_name %>
+            </a>
+          <% } else { %>—<% } %>
+        </td>
+        <td class="fw-semibold">$ <%= parseFloat(p.amount).toLocaleString('en-US', {minimumFractionDigits:2}) %></td>
+        <td style="font-size:0.82rem;white-space:nowrap;">
+          <%= new Date(p.purchase_date).toLocaleDateString('es-HN') %>
+        </td>
+        <td style="font-size:0.82rem;"><%= p.manager_name %></td>
+        <td class="text-end">
+          <a href="/purchases/<%= p.id %>" class="action-link">Ver</a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

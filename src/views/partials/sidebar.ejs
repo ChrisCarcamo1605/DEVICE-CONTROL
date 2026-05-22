@@ -1,0 +1,71 @@
+<nav id="sidebar">
+  <a href="/dashboard" class="sidebar-brand">
+    <div class="sidebar-logo-wrap">
+      <img src="/img/logo.png" alt="Device Control" class="sidebar-logo-img" />
+    </div>
+  </a>
+
+  <ul class="nav flex-column">
+
+    <li class="nav-item">
+      <a href="/dashboard" class="nav-link <%= path === '/dashboard' ? 'active' : '' %>">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a href="/devices" class="nav-link <%= path.startsWith('/devices') ? 'active' : '' %>">
+        <i class="bi bi-cpu-fill"></i> Dispositivos
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a href="/tickets" class="nav-link <%= path.startsWith('/tickets') ? 'active' : '' %>">
+        <i class="bi bi-ticket-detailed-fill"></i> Tickets
+      </a>
+    </li>
+
+    <% if (user && user.role === 'it_manager') { %>
+    <li class="nav-item">
+      <a href="/purchases" class="nav-link <%= path.startsWith('/purchases') ? 'active' : '' %>">
+        <i class="bi bi-bag-fill"></i> Compras
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <span class="sidebar-section-label">Administración</span>
+    </li>
+
+    <li class="nav-item">
+      <a href="/branches" class="nav-link <%= path.startsWith('/branches') ? 'active' : '' %>">
+        <i class="bi bi-building-fill"></i> Sucursales
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a href="/locations" class="nav-link <%= path.startsWith('/locations') ? 'active' : '' %>">
+        <i class="bi bi-geo-alt-fill"></i> Ubicaciones
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a href="/users" class="nav-link <%= path.startsWith('/users') ? 'active' : '' %>">
+        <i class="bi bi-people-fill"></i> Usuarios
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a href="/categories" class="nav-link <%= path.startsWith('/categories') ? 'active' : '' %>">
+        <i class="bi bi-tag-fill"></i> Categorías
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a href="/tags" class="nav-link <%= path.startsWith('/tags') ? 'active' : '' %>">
+        <i class="bi bi-bookmark-fill"></i> Tags de Defecto
+      </a>
+    </li>
+    <% } %>
+
+  </ul>
+</nav>

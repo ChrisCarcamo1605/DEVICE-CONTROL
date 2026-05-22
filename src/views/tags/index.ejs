@@ -1,0 +1,31 @@
+<div class="page-header">
+  <h1><i class="bi bi-bookmark me-2"></i>Tags de Defecto</h1>
+  <a href="/tags/new" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Nuevo tag
+  </a>
+</div>
+
+<div class="content-card" style="max-width:500px;">
+  <% if (tags.length === 0) { %>
+    <p class="text-muted mb-0">No hay tags registrados.</p>
+  <% } else { %>
+  <table class="table table-hover mb-0">
+    <thead><tr><th>Nombre</th><th></th></tr></thead>
+    <tbody>
+      <% tags.forEach(t => { %>
+      <tr>
+        <td><span class="badge" style="background-color:var(--btn-secondary);font-size:0.8rem;"><%= t.name %></span></td>
+        <td class="text-end">
+          <a href="/tags/<%= t.id %>/edit" class="action-link">Editar</a>
+          <span class="text-muted mx-1">•</span>
+          <form action="/tags/<%= t.id %>/delete" method="POST" class="d-inline"
+                onsubmit="return confirm('¿Eliminar este tag?')">
+            <button type="submit" class="btn btn-link action-link p-0">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

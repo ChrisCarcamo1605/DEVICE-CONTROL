@@ -1,0 +1,27 @@
+{
+  "name": "device-control",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "seed": "knex seed:run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "knex": "^3.2.10",
+    "pg": "^8.21.0"
+  }
+}

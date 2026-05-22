@@ -1,0 +1,111 @@
+<div class="page-header">
+  <h1><i class="bi bi-cart3 me-2"></i>Registrar compra</h1>
+  <a href="/purchases" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Volver
+  </a>
+</div>
+
+<div class="content-card" style="max-width:620px;">
+  <% if (errors.length) { %>
+    <div class="alert alert-danger">
+      <% errors.forEach(e => { %><div><%= e %></div><% }) %>
+    </div>
+  <% } %>
+
+  <form action="/purchases" method="POST">
+    <div class="row g-3">
+
+      <!-- Ticket vinculado -->
+      <div class="col-12">
+        <label class="form-label">Ticket vinculado <span class="text-muted">(opcional)</span></label>
+        <select name="ticket_id" class="form-select" id="ticketSelect" onchange="autoFillBranch()">
+          <option value="">— Sin ticket —</option>
+          <% tickets.forEach(t => { %>
+            <option value="<%= t.id %>"
+                    data-branch="<%= t.branch_id %>"
+                    <%= purchase?.ticket_id === t.id ? 'selected' : '' %>>
+              <%= t.device_name %> (<%= t.branch_name %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Sucursal destino -->
+      <div class="col-sm-6">
+        <label class="form-label">Sucursal destino <span class="text-danger">*</span></label>
+        <select name="branch_id" class="form-select" id="branchSelect" required>
+          <option value="">— Seleccionar —</option>
+          <% branches.forEach(b => { %>
+            <option value="<%= b.id %>"
+                    <%= (purchase?.branch_id === b.id || preTicket?.branch_id === b.id) ? 'selected' : '' %>>
+              <%= b.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Tipo -->
+      <div class="col-sm-6">
+        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+        <select name="type" class="form-select" required>
+          <option value="">— Seleccionar —</option>
+          <% Object.entries(TYPE_LABELS).forEach(([val, label]) => { %>
+            <option value="<%= val %>" <%= purchase?.type === val ? 'selected' : '' %>><%= label %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Descripción -->
+      <div class="col-12">
+        <label class="form-label">Descripción <span class="text-danger">*</span></label>
+        <input type="text" name="description" class="form-control"
+               value="<%= purchase?.description || '' %>"
+               placeholder="Ej: RAM 8GB DDR4, Laptop HP ProBook..." required />
+      </div>
+
+      <!-- Monto -->
+      <div class="col-sm-4">
+        <label class="form-label">Monto ($) <span class="text-danger">*</span></label>
+        <input type="number" name="amount" class="form-control" step="0.01" min="0"
+               value="<%= purchase?.amount || '' %>" required />
+      </div>
+
+      <!-- N° Factura -->
+      <div class="col-sm-4">
+        <label class="form-label">N° de Factura</label>
+        <input type="text" name="invoice_number" class="form-control"
+               value="<%= purchase?.invoice_number || '' %>" />
+      </div>
+
+      <!-- Fecha -->
+      <div class="col-sm-4">
+        <label class="form-label">Fecha de compra <span class="text-danger">*</span></label>
+        <input type="date" name="purchase_date" class="form-control"
+               value="<%= purchase?.purchase_date || new Date().toISOString().slice(0,10) %>" required />
+      </div>
+
+      <div class="col-12 pt-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Registrar compra</button>
+        <a href="/purchases" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+// Branch data map from ticket options
+const ticketBranches = {};
+document.querySelectorAll('#ticketSelect option[data-branch]').forEach(o => {
+  ticketBranches[o.value] = o.dataset.branch;
+});
+
+function autoFillBranch() {
+  const tid = document.getElementById('ticketSelect').value;
+  const branchId = ticketBranches[tid];
+  if (branchId) {
+    document.getElementById('branchSelect').value = branchId;
+  }
+}
+// Run on load for pre-selected ticket
+autoFillBranch();
+</script>

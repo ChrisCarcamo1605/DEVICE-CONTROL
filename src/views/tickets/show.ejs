@@ -1,0 +1,225 @@
+<div class="page-header">
+  <div>
+    <h1><i class="bi bi-ticket-detailed me-2"></i><%= ticket.device_name %></h1>
+    <small class="text-muted">
+      <% if (ticket.serial_number) { %><%= ticket.serial_number %> &nbsp;•&nbsp;<% } %>
+      <%= ticket.branch_name %> &nbsp;•&nbsp;
+      Reportado por <strong><%= ticket.reporter_name %></strong> el
+      <%= new Date(ticket.report_date).toLocaleDateString('es-HN') %>
+    </small>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <span class="badge badge-<%= ticket.status %> fs-6"><%= STATUS_LABELS[ticket.status] %></span>
+    <a href="/tickets" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+  </div>
+</div>
+
+<div class="row g-3">
+
+  <!-- Panel izquierdo: info del ticket -->
+  <div class="col-lg-8">
+
+    <!-- Descripción del problema -->
+    <div class="content-card mb-3">
+      <h6 class="fw-bold mb-2">Problema reportado</h6>
+      <p class="mb-0"><%= ticket.problem_description %></p>
+    </div>
+
+    <!-- Tags de defecto -->
+    <div class="content-card mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0">Tags de defecto</h6>
+      </div>
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <% if (tags.length === 0) { %>
+          <span class="text-muted" style="font-size:0.875rem;">Sin tags asignados.</span>
+        <% } else { %>
+          <% tags.forEach(t => { %>
+          <span class="badge d-flex align-items-center gap-1"
+                style="background-color:var(--btn-secondary);font-size:0.82rem;padding:.35em .65em;">
+            <%= t.name %>
+            <% if (user.role === 'it_manager') { %>
+            <form action="/tickets/<%= ticket.id %>/tags/<%= t.id %>/delete" method="POST" class="d-inline m-0">
+              <button type="submit" class="btn btn-link p-0 text-white" style="font-size:0.75rem;line-height:1;"
+                      title="Quitar tag">&times;</button>
+            </form>
+            <% } %>
+          </span>
+          <% }) %>
+        <% } %>
+      </div>
+      <% if (user.role === 'it_manager') { %>
+      <form action="/tickets/<%= ticket.id %>/tags" method="POST" class="d-flex gap-2">
+        <select name="tag_id" class="form-select form-select-sm" style="max-width:220px;" required>
+          <option value="">+ Agregar tag</option>
+          <% allTags.filter(t => !tagIds.includes(t.id)).forEach(t => { %>
+            <option value="<%= t.id %>"><%= t.name %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">Agregar</button>
+      </form>
+      <% } %>
+    </div>
+
+    <!-- Notas de resolución -->
+    <% if (ticket.resolution_notes) { %>
+    <div class="content-card mb-3">
+      <h6 class="fw-bold mb-2">Notas de resolución</h6>
+      <p class="mb-0"><%= ticket.resolution_notes %></p>
+    </div>
+    <% } %>
+
+  </div>
+
+  <!-- Panel derecho: acciones y fechas -->
+  <div class="col-lg-4">
+
+    <!-- Info de gestión -->
+    <div class="content-card mb-3">
+      <h6 class="fw-bold mb-3">Gestión</h6>
+      <dl class="row mb-0" style="font-size:0.875rem;">
+        <dt class="col-6 text-muted">IT Manager</dt>
+        <dd class="col-6"><%= ticket.manager_name || '—' %></dd>
+
+        <dt class="col-6 text-muted">Recolección</dt>
+        <dd class="col-6">
+          <% if (ticket.collection_date) { %>
+            <%= new Date(ticket.collection_date).toLocaleDateString('es-HN') %>
+            <% if (ticket.collection_done_at) { %>
+              <small class="text-success d-block"><i class="bi bi-check2"></i> Completada</small>
+            <% } %>
+          <% } else { %>—<% } %>
+        </dd>
+
+        <dt class="col-6 text-muted">Devolución</dt>
+        <dd class="col-6">
+          <% if (ticket.return_date) { %>
+            <%= new Date(ticket.return_date).toLocaleDateString('es-HN') %>
+            <% if (ticket.return_done_at) { %>
+              <small class="text-success d-block"><i class="bi bi-check2"></i> Completada</small>
+            <% } %>
+          <% } else { %>—<% } %>
+        </dd>
+
+        <dt class="col-6 text-muted">Dispositivo</dt>
+        <dd class="col-6">
+          <a href="/devices/<%= ticket.device_id_ref %>" class="action-link"><%= ticket.device_name %></a>
+        </dd>
+      </dl>
+    </div>
+
+    <!-- Acciones IT Manager -->
+    <% if (user.role === 'it_manager') { %>
+
+      <!-- Tomar ticket -->
+      <% if (ticket.status === 'pending' && !ticket.it_manager_id) { %>
+      <div class="content-card mb-3">
+        <form action="/tickets/<%= ticket.id %>/assign" method="POST">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-person-check me-1"></i>Tomar este ticket
+          </button>
+        </form>
+      </div>
+      <% } %>
+
+      <!-- Cambiar estado -->
+      <% if (nextStatuses.length > 0) { %>
+      <div class="content-card mb-3">
+        <h6 class="fw-bold mb-3">Cambiar estado</h6>
+        <form action="/tickets/<%= ticket.id %>/status" method="POST">
+          <div class="mb-2">
+            <select name="status" class="form-select form-select-sm" required>
+              <option value="">— Seleccionar —</option>
+              <% nextStatuses.forEach(s => { %>
+                <option value="<%= s.value %>"><%= s.label %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="mb-2">
+            <textarea name="resolution_notes" class="form-control form-control-sm" rows="2"
+                      placeholder="Notas (opcional)"></textarea>
+          </div>
+          <button type="submit" class="btn btn-secondary btn-sm w-100">Actualizar estado</button>
+        </form>
+      </div>
+      <% } %>
+
+      <!-- Agendar recolección -->
+      <% if (['pending','in_diagnosis'].includes(ticket.status)) { %>
+      <div class="content-card mb-3">
+        <h6 class="fw-bold mb-2">Agendar recolección</h6>
+        <form action="/tickets/<%= ticket.id %>/schedule-collection" method="POST" class="d-flex gap-2">
+          <input type="datetime-local" name="collection_date" class="form-control form-control-sm"
+                 value="<%= ticket.collection_date ? new Date(ticket.collection_date).toISOString().slice(0,16) : '' %>" required />
+          <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
+        </form>
+      </div>
+      <% } %>
+
+      <!-- Agendar devolución -->
+      <% if (['in_repair','finalized'].includes(ticket.status)) { %>
+      <div class="content-card mb-3">
+        <h6 class="fw-bold mb-2">Agendar devolución</h6>
+        <form action="/tickets/<%= ticket.id %>/schedule-return" method="POST" class="d-flex gap-2">
+          <input type="datetime-local" name="return_date" class="form-control form-control-sm"
+                 value="<%= ticket.return_date ? new Date(ticket.return_date).toISOString().slice(0,16) : '' %>" required />
+          <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
+        </form>
+      </div>
+      <% } %>
+
+      <!-- Registrar compra -->
+      <% if (!['cancelled','delivered'].includes(ticket.status)) { %>
+      <div class="content-card mb-3">
+        <a href="/purchases/new?ticket_id=<%= ticket.id %>" class="btn btn-outline-secondary btn-sm w-100">
+          <i class="bi bi-cart3 me-1"></i>Registrar compra
+        </a>
+      </div>
+      <% } %>
+
+    <% } %> <!-- /it_manager -->
+
+  </div>
+</div>
+
+<!-- Compras vinculadas al ticket -->
+<% if (user.role === 'it_manager') { %>
+<div class="content-card mt-3" id="purchases-section">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold mb-0">Compras vinculadas</h6>
+    <a href="/purchases/new?ticket_id=<%= ticket.id %>" class="btn btn-outline-secondary btn-sm" style="font-size:0.78rem;">
+      <i class="bi bi-plus-lg"></i> Registrar
+    </a>
+  </div>
+  <div id="ticket-purchases">
+    <p class="text-muted mb-0" style="font-size:0.875rem;">Cargando...</p>
+  </div>
+</div>
+<script>
+fetch('/api/tickets/<%= ticket.id %>/purchases')
+  .then(r => r.json())
+  .then(data => {
+    const el = document.getElementById('ticket-purchases');
+    if (!data.length) {
+      el.innerHTML = '<p class="text-muted mb-0" style="font-size:0.875rem;">Sin compras registradas.</p>';
+      return;
+    }
+    el.innerHTML = data.map(p => `
+      <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+        <div>
+          <span class="fw-semibold" style="font-size:0.875rem;">${p.description}</span>
+          <small class="text-muted d-block">${new Date(p.purchase_date).toLocaleDateString('es-HN')} — ${p.type === 'new_device' ? 'Equipo nuevo' : 'Repuesto'}</small>
+        </div>
+        <div class="text-end">
+          <span class="fw-bold" style="color:var(--btn-primary);">$ ${parseFloat(p.amount).toLocaleString('en-US',{minimumFractionDigits:2})}</span>
+          <small class="d-block"><a href="/purchases/${p.id}" class="action-link">Ver</a></small>
+        </div>
+      </div>`).join('');
+  })
+  .catch(() => {
+    document.getElementById('ticket-purchases').innerHTML = '<p class="text-muted mb-0" style="font-size:0.875rem;">No se pudieron cargar las compras.</p>';
+  });
+</script>
+<% } %>

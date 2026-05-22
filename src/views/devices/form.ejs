@@ -1,0 +1,119 @@
+<div class="page-header">
+  <h1><i class="bi bi-cpu me-2"></i><%= title %></h1>
+  <a href="/devices" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Volver
+  </a>
+</div>
+
+<div class="content-card" style="max-width:640px;">
+  <% if (errors.length) { %>
+    <div class="alert alert-danger">
+      <% errors.forEach(e => { %><div><%= e %></div><% }) %>
+    </div>
+  <% } %>
+
+  <form action="<%= device ? '/devices/' + device.id : '/devices' %>" method="POST">
+    <div class="row g-3">
+      <div class="col-sm-8">
+        <label class="form-label">Nombre <span class="text-danger">*</span></label>
+        <input type="text" name="name" class="form-control"
+               value="<%= device?.name || '' %>" required />
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">N° de Serie</label>
+        <input type="text" name="serial_number" class="form-control"
+               value="<%= device?.serial_number || '' %>" />
+      </div>
+
+      <div class="col-sm-6">
+        <label class="form-label">Categoría</label>
+        <select name="category_id" class="form-select">
+          <option value="">— Sin categoría —</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>" <%= device?.category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label">Sucursal <span class="text-danger">*</span></label>
+        <select name="branch_id" id="branchSelect" class="form-select" required>
+          <option value="">— Seleccionar —</option>
+          <% branches.forEach(b => { %>
+            <option value="<%= b.id %>" <%= device?.branch_id === b.id ? 'selected' : '' %>><%= b.name %></option>
+          <% }) %>
+        </select>
+        <div id="branchNote" class="form-text text-muted" style="display:none;">
+          <i class="bi bi-info-circle me-1"></i>Heredada del dispositivo padre.
+        </div>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Componente de (dispositivo padre)</label>
+        <select name="parent_device_id" id="parentSelect" class="form-select" onchange="syncBranch()">
+          <option value="" data-branch="">— Dispositivo independiente —</option>
+          <% parentDevices.forEach(p => { %>
+            <option value="<%= p.id %>"
+                    data-branch="<%= p.branch_id %>"
+                    <%= device?.parent_device_id === p.id ? 'selected' : '' %>>
+              <%= p.name %><%= p.serial_number ? ' — ' + p.serial_number : '' %>
+              (<%= branches.find(b => b.id === p.branch_id)?.name || '' %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-sm-4">
+        <label class="form-label">Valor ($)</label>
+        <input type="number" name="value" class="form-control" step="0.01" min="0"
+               value="<%= device?.value || '' %>" />
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">Fecha de compra</label>
+        <input type="date" name="purchase_date" class="form-control"
+               value="<%= device?.purchase_date ? new Date(device.purchase_date).toISOString().slice(0,10) : '' %>" />
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label">N° de Factura</label>
+        <input type="text" name="invoice_number" class="form-control"
+               value="<%= device?.invoice_number || '' %>" />
+      </div>
+
+      <div class="col-sm-4">
+        <label class="form-label">Estado</label>
+        <select name="status" class="form-select">
+          <option value="active"    <%= (device?.status || 'active') === 'active'    ? 'selected' : '' %>>Activo</option>
+          <option value="in_repair" <%= device?.status === 'in_repair' ? 'selected' : '' %>>En reparación</option>
+          <option value="replaced"  <%= device?.status === 'replaced'  ? 'selected' : '' %>>Reemplazado</option>
+          <option value="retired"   <%= device?.status === 'retired'   ? 'selected' : '' %>>Retirado</option>
+        </select>
+      </div>
+
+      <div class="col-12 pt-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <%= device ? 'Guardar cambios' : 'Registrar dispositivo' %>
+        </button>
+        <a href="/devices" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+function syncBranch() {
+  const parentSel = document.getElementById('parentSelect');
+  const branchSel = document.getElementById('branchSelect');
+  const note      = document.getElementById('branchNote');
+  const branchId  = parentSel.selectedOptions[0]?.dataset.branch;
+
+  if (branchId) {
+    branchSel.value    = branchId;
+    branchSel.disabled = true;
+    note.style.display = 'block';
+  } else {
+    branchSel.disabled = false;
+    note.style.display = 'none';
+  }
+}
+// Run on load so edit mode reflects pre-selected parent
+syncBranch();
+</script>

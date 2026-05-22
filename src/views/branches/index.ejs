@@ -1,0 +1,50 @@
+<div class="page-header">
+  <h1><i class="bi bi-building me-2"></i>Sucursales</h1>
+  <% if (user.role === 'it_manager') { %>
+  <a href="/branches/new" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Nueva sucursal
+  </a>
+  <% } %>
+</div>
+
+<div class="content-card">
+  <% if (branches.length === 0) { %>
+    <p class="text-muted mb-0">No hay sucursales registradas.</p>
+  <% } else { %>
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Dirección</th>
+        <th>Ubicación</th>
+        <th>Teléfono</th>
+        <% if (user.role === 'it_manager') { %><th></th><% } %>
+      </tr>
+    </thead>
+    <tbody>
+      <% branches.forEach(b => { %>
+      <tr>
+        <td class="fw-semibold"><%= b.name %></td>
+        <td><%= b.address || '—' %></td>
+        <td>
+          <% if (b.location_name) { %>
+            <%= b.location_name %><span class="text-muted">, <%= b.department %></span>
+          <% } else { %>—<% } %>
+        </td>
+        <td><%= b.phone || '—' %></td>
+        <% if (user.role === 'it_manager') { %>
+        <td class="text-end">
+          <a href="/branches/<%= b.id %>/edit" class="action-link">Editar</a>
+          <span class="text-muted mx-1">•</span>
+          <form action="/branches/<%= b.id %>/delete" method="POST" class="d-inline"
+                onsubmit="return confirm('¿Eliminar esta sucursal?')">
+            <button type="submit" class="btn btn-link action-link p-0">Eliminar</button>
+          </form>
+        </td>
+        <% } %>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

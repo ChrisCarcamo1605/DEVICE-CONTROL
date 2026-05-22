@@ -1,0 +1,51 @@
+<div class="page-header">
+  <h1><i class="bi bi-cart3 me-2"></i>Detalle de compra</h1>
+  <a href="/purchases" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Volver
+  </a>
+</div>
+
+<div class="content-card" style="max-width:560px;">
+  <dl class="row mb-0">
+    <dt class="col-4 text-muted">Descripción</dt>
+    <dd class="col-8 fw-semibold"><%= purchase.description %></dd>
+
+    <dt class="col-4 text-muted">Tipo</dt>
+    <dd class="col-8">
+      <span class="badge" style="background-color:<%= purchase.type === 'new_device' ? 'var(--btn-primary)' : 'var(--btn-secondary)' %>;">
+        <%= TYPE_LABELS[purchase.type] %>
+      </span>
+    </dd>
+
+    <dt class="col-4 text-muted">Monto</dt>
+    <dd class="col-8 fw-bold fs-5" style="color:var(--btn-primary);">
+      $ <%= parseFloat(purchase.amount).toLocaleString('en-US', {minimumFractionDigits:2}) %>
+    </dd>
+
+    <dt class="col-4 text-muted">Sucursal destino</dt>
+    <dd class="col-8"><%= purchase.branch_name %></dd>
+
+    <dt class="col-4 text-muted">Fecha de compra</dt>
+    <dd class="col-8"><%= new Date(purchase.purchase_date).toLocaleDateString('es-HN') %></dd>
+
+    <dt class="col-4 text-muted">N° Factura</dt>
+    <dd class="col-8"><%= purchase.invoice_number || '—' %></dd>
+
+    <dt class="col-4 text-muted">Registrado por</dt>
+    <dd class="col-8"><%= purchase.manager_name %></dd>
+
+    <dt class="col-4 text-muted">Ticket</dt>
+    <dd class="col-8">
+      <% if (purchase.ticket_ref) { %>
+        <a href="/tickets/<%= purchase.ticket_ref %>" class="action-link">
+          <i class="bi bi-ticket me-1"></i><%= purchase.ticket_device_name %>
+        </a>
+      <% } else { %>—<% } %>
+    </dd>
+
+    <dt class="col-4 text-muted">Registrado el</dt>
+    <dd class="col-8" style="font-size:0.875rem;">
+      <%= new Date(purchase.created_at).toLocaleDateString('es-HN') %>
+    </dd>
+  </dl>
+</div>

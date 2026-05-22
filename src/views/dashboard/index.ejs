@@ -1,0 +1,145 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <small class="text-muted" style="font-size:0.82rem;">
+    <%= new Date().toLocaleDateString('es-HN', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) %>
+  </small>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="content-card text-center">
+      <div style="font-size:1.8rem;color:var(--btn-primary);"><i class="bi bi-cpu"></i></div>
+      <div class="fw-bold" style="font-size:1.6rem;"><%= stats.devices %></div>
+      <div class="text-muted" style="font-size:0.8rem;">Dispositivos activos</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="content-card text-center">
+      <div style="font-size:1.8rem;color:#f97316;"><i class="bi bi-ticket-detailed"></i></div>
+      <div class="fw-bold" style="font-size:1.6rem;"><%= stats.openTickets %></div>
+      <div class="text-muted" style="font-size:0.8rem;">Tickets abiertos</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="content-card text-center">
+      <div style="font-size:1.8rem;color:#9ca3af;"><i class="bi bi-hourglass-split"></i></div>
+      <div class="fw-bold" style="font-size:1.6rem;"><%= stats.pendingTickets %></div>
+      <div class="text-muted" style="font-size:0.8rem;">Tickets pendientes</div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <% if (user.role === 'it_manager') { %>
+    <div class="content-card text-center">
+      <div style="font-size:1.8rem;color:#22c55e;"><i class="bi bi-cart3"></i></div>
+      <div class="fw-bold" style="font-size:1.4rem;">
+        $ <%= stats.monthlyPurchases ? parseFloat(stats.monthlyPurchases).toLocaleString('en-US',{minimumFractionDigits:2}) : '0.00' %>
+      </div>
+      <div class="text-muted" style="font-size:0.8rem;">Compras este mes</div>
+    </div>
+    <% } else { %>
+    <div class="content-card text-center">
+      <div style="font-size:1.8rem;color:#22c55e;"><i class="bi bi-check-circle"></i></div>
+      <div class="fw-bold" style="font-size:1.6rem;"><%= stats.deliveredTickets %></div>
+      <div class="text-muted" style="font-size:0.8rem;">Entregados este mes</div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<div class="row g-3">
+
+  <!-- Tickets recientes -->
+  <div class="col-lg-8">
+    <div class="content-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Tickets recientes</h6>
+        <a href="/tickets" class="action-link" style="font-size:0.82rem;">Ver todos</a>
+      </div>
+      <% if (recentTickets.length === 0) { %>
+        <p class="text-muted mb-0" style="font-size:0.875rem;">No hay tickets aún.</p>
+      <% } else { %>
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Dispositivo</th>
+            <% if (user.role === 'it_manager') { %><th>Sucursal</th><% } %>
+            <th>Estado</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% recentTickets.forEach(t => { %>
+          <tr>
+            <td>
+              <a href="/tickets/<%= t.id %>" class="action-link fw-semibold"><%= t.device_name %></a>
+              <small class="text-muted d-block" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                <%= t.problem_description %>
+              </small>
+            </td>
+            <% if (user.role === 'it_manager') { %>
+            <td style="font-size:0.82rem;"><%= t.branch_name %></td>
+            <% } %>
+            <td><span class="badge badge-<%= t.status %>" style="font-size:0.75rem;"><%= STATUS_LABELS[t.status] %></span></td>
+            <td style="font-size:0.8rem;white-space:nowrap;">
+              <%= new Date(t.report_date).toLocaleDateString('es-HN') %>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="col-lg-4">
+
+    <!-- Acciones rápidas -->
+    <div class="content-card mb-3">
+      <h6 class="fw-bold mb-3">Acciones rápidas</h6>
+      <div class="d-grid gap-2">
+        <a href="/tickets/new" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus-lg me-1"></i>Nuevo ticket
+        </a>
+        <% if (user.role === 'it_manager') { %>
+        <a href="/devices/new" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-cpu me-1"></i>Registrar dispositivo
+        </a>
+        <a href="/purchases/new" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-cart3 me-1"></i>Registrar compra
+        </a>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Breakdown de tickets (solo it_manager) -->
+    <% if (user.role === 'it_manager' && statusBreakdown.length) { %>
+    <div class="content-card">
+      <h6 class="fw-bold mb-3">Tickets por estado</h6>
+      <% statusBreakdown.forEach(s => { %>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="badge badge-<%= s.status %>" style="font-size:0.75rem;">
+          <%= STATUS_LABELS[s.status] || s.status %>
+        </span>
+        <strong style="font-size:0.9rem;"><%= s.count %></strong>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <!-- In repair alert -->
+    <% if (parseInt(stats.inRepair) > 0) { %>
+    <div class="content-card mt-3" style="border-left:3px solid #f97316;">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-tools" style="color:#f97316;font-size:1.2rem;"></i>
+        <div>
+          <div class="fw-semibold" style="font-size:0.875rem;"><%= stats.inRepair %> en reparación</div>
+          <a href="/tickets?status=in_repair" class="action-link" style="font-size:0.8rem;">Ver tickets</a>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+  </div>
+</div>

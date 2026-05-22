@@ -1,0 +1,93 @@
+<div class="page-header">
+  <h1><i class="bi bi-ticket-detailed me-2"></i>Tickets</h1>
+  <a href="/tickets/new" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Nuevo ticket
+  </a>
+</div>
+
+<!-- Filtros -->
+<form method="GET" action="/tickets" class="content-card mb-3 p-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Estado</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        <% Object.entries(STATUS_LABELS).forEach(([val, label]) => { %>
+          <option value="<%= val %>" <%= filters.status === val ? 'selected' : '' %>><%= label %></option>
+        <% }) %>
+      </select>
+    </div>
+    <% if (user.role === 'it_manager') { %>
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Sucursal</label>
+      <select name="branch_id" class="form-select form-select-sm">
+        <option value="">Todas</option>
+        <% branches.forEach(b => { %>
+          <option value="<%= b.id %>" <%= filters.branch_id === b.id ? 'selected' : '' %>><%= b.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">IT Manager</label>
+      <select name="it_manager_id" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        <% managers.forEach(m => { %>
+          <option value="<%= m.id %>" <%= filters.it_manager_id === m.id ? 'selected' : '' %>><%= m.full_name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <% } %>
+    <div class="col-sm-2">
+      <button type="submit" class="btn btn-secondary btn-sm w-100">Filtrar</button>
+    </div>
+    <div class="col-sm-1">
+      <a href="/tickets" class="btn btn-outline-secondary btn-sm w-100" title="Limpiar">
+        <i class="bi bi-x-lg"></i>
+      </a>
+    </div>
+  </div>
+</form>
+
+<div class="content-card">
+  <% if (tickets.length === 0) { %>
+    <p class="text-muted mb-0">No hay tickets con los filtros seleccionados.</p>
+  <% } else { %>
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Dispositivo</th>
+        <th>Sucursal</th>
+        <th>Problema</th>
+        <th>Estado</th>
+        <th>IT Manager</th>
+        <th>Fecha reporte</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% tickets.forEach(t => { %>
+      <tr>
+        <td>
+          <a href="/tickets/<%= t.id %>" class="action-link fw-semibold"><%= t.device_name %></a>
+          <% if (t.serial_number) { %><small class="text-muted d-block"><%= t.serial_number %></small><% } %>
+        </td>
+        <td><%= t.branch_name %></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <%= t.problem_description %>
+        </td>
+        <td>
+          <span class="badge badge-<%= t.status %>"><%= STATUS_LABELS[t.status] %></span>
+        </td>
+        <td><% if (t.manager_name) { %><%= t.manager_name %><% } else { %><span class="text-muted">—</span><% } %></td>
+        <td style="font-size:0.82rem;white-space:nowrap;">
+          <%= new Date(t.report_date).toLocaleDateString('es-HN') %>
+        </td>
+        <td class="text-end">
+          <a href="/tickets/<%= t.id %>" class="action-link">Ver</a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>

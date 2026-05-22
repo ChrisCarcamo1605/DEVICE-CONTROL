@@ -1,0 +1,99 @@
+<div class="page-header">
+  <h1><i class="bi bi-cpu me-2"></i>Dispositivos</h1>
+  <% if (user.role === 'it_manager') { %>
+  <a href="/devices/new" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Nuevo dispositivo
+  </a>
+  <% } %>
+</div>
+
+<!-- Filtros -->
+<form method="GET" action="/devices" class="content-card mb-3 p-3">
+  <div class="row g-2 align-items-end">
+    <% if (user.role === 'it_manager') { %>
+    <div class="col-sm-4">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Sucursal</label>
+      <select name="branch_id" class="form-select form-select-sm">
+        <option value="">Todas</option>
+        <% branches.forEach(b => { %>
+          <option value="<%= b.id %>" <%= filters.branch_id === b.id ? 'selected' : '' %>><%= b.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <% } %>
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Categoría</label>
+      <select name="category_id" class="form-select form-select-sm">
+        <option value="">Todas</option>
+        <% categories.forEach(c => { %>
+          <option value="<%= c.id %>" <%= filters.category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="col-sm-3">
+      <label class="form-label mb-1" style="font-size:0.8rem;">Estado</label>
+      <select name="status" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Activo</option>
+        <option value="in_repair" <%= filters.status === 'in_repair' ? 'selected' : '' %>>En reparación</option>
+        <option value="replaced" <%= filters.status === 'replaced' ? 'selected' : '' %>>Reemplazado</option>
+        <option value="retired" <%= filters.status === 'retired' ? 'selected' : '' %>>Retirado</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <button type="submit" class="btn btn-secondary btn-sm w-100">Filtrar</button>
+    </div>
+  </div>
+</form>
+
+<div class="content-card">
+  <% if (devices.length === 0) { %>
+    <p class="text-muted mb-0">No hay dispositivos con los filtros seleccionados.</p>
+  <% } else { %>
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>N° Serie</th>
+        <th>Categoría</th>
+        <th>Sucursal</th>
+        <th>Componente de</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% devices.forEach(d => { %>
+      <tr>
+        <td><a href="/devices/<%= d.id %>" class="action-link fw-semibold"><%= d.name %></a></td>
+        <td class="text-muted" style="font-size:0.82rem;"><%= d.serial_number || '—' %></td>
+        <td><%= d.category_name || '—' %></td>
+        <td><%= d.branch_name %></td>
+        <td>
+          <% if (d.parent_name) { %>
+            <a href="/devices/<%= d.parent_device_id %>" class="action-link"><%= d.parent_name %></a>
+          <% } else { %>—<% } %>
+        </td>
+        <td>
+          <span class="badge badge-<%= d.status %>">
+            <%= { active:'Activo', in_repair:'En reparación', replaced:'Reemplazado', retired:'Retirado' }[d.status] || d.status %>
+          </span>
+        </td>
+        <td class="text-end">
+          <a href="/devices/<%= d.id %>" class="action-link">Ver</a>
+          <% if (user.role === 'it_manager') { %>
+          <span class="text-muted mx-1">•</span>
+          <a href="/devices/<%= d.id %>/edit" class="action-link">Editar</a>
+          <span class="text-muted mx-1">•</span>
+          <form action="/devices/<%= d.id %>/delete" method="POST" class="d-inline"
+                onsubmit="return confirm('¿Eliminar este dispositivo?')">
+            <button type="submit" class="btn btn-link action-link p-0">Eliminar</button>
+          </form>
+          <% } %>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
