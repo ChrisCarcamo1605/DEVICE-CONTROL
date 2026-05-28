@@ -1,6 +1,6 @@
 <div class="page-header">
-  <h1><i class="bi bi-cart3 me-2"></i>Registrar compra</h1>
-  <a href="/purchases" class="btn btn-outline-secondary btn-sm">
+  <h1><i class="bi bi-cart3 me-2"></i><%= title %></h1>
+  <a href="<%= purchase?.id ? '/purchases/' + purchase.id : '/purchases' %>" class="btn btn-outline-secondary btn-sm">
     <i class="bi bi-arrow-left me-1"></i>Volver
   </a>
 </div>
@@ -12,7 +12,7 @@
     </div>
   <% } %>
 
-  <form action="/purchases" method="POST">
+  <form action="<%= purchase?.id ? '/purchases/' + purchase.id : '/purchases' %>" method="POST">
     <div class="row g-3">
 
       <!-- Ticket vinculado -->
@@ -47,7 +47,7 @@
       <!-- Tipo -->
       <div class="col-sm-6">
         <label class="form-label">Tipo <span class="text-danger">*</span></label>
-        <select name="type" class="form-select" required>
+        <select name="type" class="form-select" id="typeSelect" required onchange="toggleDeviceFields()">
           <option value="">— Seleccionar —</option>
           <% Object.entries(TYPE_LABELS).forEach(([val, label]) => { %>
             <option value="<%= val %>" <%= purchase?.type === val ? 'selected' : '' %>><%= label %></option>
@@ -55,12 +55,37 @@
         </select>
       </div>
 
-      <!-- Descripción -->
+      <!-- Descripción / Nombre del equipo -->
       <div class="col-12">
-        <label class="form-label">Descripción <span class="text-danger">*</span></label>
+        <label class="form-label" id="descLabel">Descripción <span class="text-danger">*</span></label>
         <input type="text" name="description" class="form-control"
                value="<%= purchase?.description || '' %>"
                placeholder="Ej: RAM 8GB DDR4, Laptop HP ProBook..." required />
+      </div>
+
+      <!-- Campos adicionales para equipo nuevo -->
+      <div id="newDeviceFields" class="col-12" style="display:none;">
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label">Número de serie</label>
+            <input type="text" name="device_serial" class="form-control"
+                   value="<%= purchase?.device_serial || '' %>"
+                   placeholder="Ej: SN-ABC12345" />
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Categoría</label>
+            <select name="device_category_id" class="form-select">
+              <option value="">— Sin categoría —</option>
+              <% categories.forEach(c => { %>
+                <option value="<%= c.id %>" <%= purchase?.device_category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+        <div class="alert alert-info mt-2 mb-0 py-2 small">
+          <i class="bi bi-info-circle me-1"></i>
+          Al guardar, el equipo se registrará automáticamente en el inventario de dispositivos.
+        </div>
       </div>
 
       <!-- Monto -->
@@ -81,12 +106,14 @@
       <div class="col-sm-4">
         <label class="form-label">Fecha de compra <span class="text-danger">*</span></label>
         <input type="date" name="purchase_date" class="form-control"
-               value="<%= purchase?.purchase_date || new Date().toISOString().slice(0,10) %>" required />
+               value="<%= purchase?.purchase_date ? new Date(purchase.purchase_date).toISOString().slice(0,10) : new Date().toISOString().slice(0,10) %>" required />
       </div>
 
       <div class="col-12 pt-2 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Registrar compra</button>
-        <a href="/purchases" class="btn btn-outline-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <%= purchase?.id ? 'Guardar cambios' : 'Registrar compra' %>
+        </button>
+        <a href="<%= purchase?.id ? '/purchases/' + purchase.id : '/purchases' %>" class="btn btn-outline-secondary">Cancelar</a>
       </div>
     </div>
   </form>
@@ -106,6 +133,21 @@ function autoFillBranch() {
     document.getElementById('branchSelect').value = branchId;
   }
 }
-// Run on load for pre-selected ticket
+
+function toggleDeviceFields() {
+  const type = document.getElementById('typeSelect').value;
+  const fields = document.getElementById('newDeviceFields');
+  const label = document.getElementById('descLabel');
+  if (type === 'new_device') {
+    fields.style.display = '';
+    label.innerHTML = 'Nombre del equipo <span class="text-danger">*</span>';
+  } else {
+    fields.style.display = 'none';
+    label.innerHTML = 'Descripción <span class="text-danger">*</span>';
+  }
+}
+
+// Run on load for pre-selected ticket and type
 autoFillBranch();
+toggleDeviceFields();
 </script>

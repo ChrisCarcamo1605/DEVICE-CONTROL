@@ -1,8 +1,19 @@
 <div class="page-header">
   <h1><i class="bi bi-cart3 me-2"></i>Detalle de compra</h1>
-  <a href="/purchases" class="btn btn-outline-secondary btn-sm">
-    <i class="bi bi-arrow-left me-1"></i>Volver
-  </a>
+  <div class="d-flex gap-2">
+    <a href="/purchases/<%= purchase.id %>/edit" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-pencil me-1"></i>Editar
+    </a>
+    <form action="/purchases/<%= purchase.id %>/delete" method="POST"
+          onsubmit="return confirm('¿Eliminar esta compra?<% if (purchase.new_device_id) { %> También se eliminará el dispositivo asociado.<% } %>');">
+      <button type="submit" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-trash me-1"></i>Eliminar
+      </button>
+    </form>
+    <a href="/purchases" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+  </div>
 </div>
 
 <div class="content-card" style="max-width:560px;">

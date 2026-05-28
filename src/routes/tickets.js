@@ -5,24 +5,28 @@ const db = require('../config/db');
 router.use(requireAuth);
 
 const STATUS_LABELS = {
-  pending: 'Pendiente',
-  in_diagnosis: 'En diagnóstico',
-  waiting_parts: 'Esperando repuestos',
-  in_repair: 'En reparación',
-  finalized: 'Finalizado',
-  cancelled: 'Cancelado',
-  delivered: 'Entregado',
+  pending:               'Pendiente',
+  in_diagnosis:          'En diagnóstico',
+  scheduled_collection:  'Recolección agendada',
+  waiting_parts:         'Esperando repuestos',
+  in_repair:             'En reparación',
+  scheduled_return:      'Devolución agendada',
+  finalized:             'Finalizado',
+  cancelled:             'Cancelado',
+  delivered:             'Entregado',
 };
 
 // Transitions allowed per status (it_manager only)
 const TRANSITIONS = {
-  pending:       ['in_diagnosis', 'cancelled'],
-  in_diagnosis:  ['waiting_parts', 'in_repair', 'finalized', 'cancelled'],
-  waiting_parts: ['in_repair', 'cancelled'],
-  in_repair:     ['finalized', 'cancelled'],
-  finalized:     ['delivered'],
-  cancelled:     [],
-  delivered:     [],
+  pending:              ['in_diagnosis', 'cancelled'],
+  in_diagnosis:         ['waiting_parts', 'in_repair', 'finalized', 'cancelled'],
+  scheduled_collection: ['in_diagnosis', 'waiting_parts', 'in_repair', 'cancelled'],
+  waiting_parts:        ['in_repair', 'cancelled'],
+  in_repair:            ['finalized', 'cancelled'],
+  scheduled_return:     ['delivered', 'cancelled'],
+  finalized:            ['delivered'],
+  cancelled:            [],
+  delivered:            [],
 };
 
 // ── LIST ──────────────────────────────────────────────────────────────────────
@@ -178,20 +182,28 @@ router.post('/:id/status', requireRole('it_manager'), async (req, res) => {
 // ── SCHEDULE COLLECTION ───────────────────────────────────────────────────────
 router.post('/:id/schedule-collection', requireRole('it_manager'), async (req, res) => {
   const { collection_date } = req.body;
-  await db('tickets').where({ id: req.params.id }).update({
-    collection_date: collection_date || null,
-    updated_at: new Date(),
-  });
+  const ticket = await db('tickets').where({ id: req.params.id }).first();
+  if (!ticket) return res.redirect('/tickets');
+
+  const update = { collection_date: collection_date || null, updated_at: new Date() };
+  if (collection_date && ['pending', 'in_diagnosis'].includes(ticket.status)) {
+    update.status = 'scheduled_collection';
+  }
+  await db('tickets').where({ id: req.params.id }).update(update);
   res.redirect(`/tickets/${req.params.id}`);
 });
 
 // ── SCHEDULE RETURN ───────────────────────────────────────────────────────────
 router.post('/:id/schedule-return', requireRole('it_manager'), async (req, res) => {
   const { return_date } = req.body;
-  await db('tickets').where({ id: req.params.id }).update({
-    return_date: return_date || null,
-    updated_at: new Date(),
-  });
+  const ticket = await db('tickets').where({ id: req.params.id }).first();
+  if (!ticket) return res.redirect('/tickets');
+
+  const update = { return_date: return_date || null, updated_at: new Date() };
+  if (return_date && ['in_repair', 'finalized'].includes(ticket.status)) {
+    update.status = 'scheduled_return';
+  }
+  await db('tickets').where({ id: req.params.id }).update(update);
   res.redirect(`/tickets/${req.params.id}`);
 });
 

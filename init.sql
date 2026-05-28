@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS "public"."maintenance_history" (
     "diagnosis" "text",
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT "maintenance_history_action_check" CHECK (("action" = ANY (ARRAY['diagnosis'::"text", 'repair'::"text", 'replace'::"text", 'new_purchase'::"text"])))
+    CONSTRAINT "maintenance_history_action_check" CHECK (("action" = ANY (ARRAY['diagnosis'::"text", 'repair'::"text", 'replace'::"text", 'new_purchase'::"text", 'purchase_modified'::"text"])))
 );
 
 
@@ -280,7 +280,7 @@ CREATE TABLE IF NOT EXISTS "public"."tickets" (
     "resolution_notes" "text",
     "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT "tickets_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'in_diagnosis'::"text", 'waiting_parts'::"text", 'in_repair'::"text", 'finalized'::"text", 'cancelled'::"text", 'delivered'::"text"])))
+    CONSTRAINT "tickets_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'in_diagnosis'::"text", 'scheduled_collection'::"text", 'waiting_parts'::"text", 'in_repair'::"text", 'scheduled_return'::"text", 'finalized'::"text", 'cancelled'::"text", 'delivered'::"text"])))
 );
 
 

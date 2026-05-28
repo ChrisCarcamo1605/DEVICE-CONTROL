@@ -86,7 +86,7 @@
         <dt class="col-6 text-muted">Recolección</dt>
         <dd class="col-6">
           <% if (ticket.collection_date) { %>
-            <%= new Date(ticket.collection_date).toLocaleDateString('es-HN') %>
+            <%= new Date(ticket.collection_date).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' }) %>
             <% if (ticket.collection_done_at) { %>
               <small class="text-success d-block"><i class="bi bi-check2"></i> Completada</small>
             <% } %>
@@ -96,7 +96,7 @@
         <dt class="col-6 text-muted">Devolución</dt>
         <dd class="col-6">
           <% if (ticket.return_date) { %>
-            <%= new Date(ticket.return_date).toLocaleDateString('es-HN') %>
+            <%= new Date(ticket.return_date).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' }) %>
             <% if (ticket.return_done_at) { %>
               <small class="text-success d-block"><i class="bi bi-check2"></i> Completada</small>
             <% } %>
@@ -147,25 +147,31 @@
       <% } %>
 
       <!-- Agendar recolección -->
-      <% if (['pending','in_diagnosis'].includes(ticket.status)) { %>
+      <% if (['pending','in_diagnosis','scheduled_collection'].includes(ticket.status)) { %>
       <div class="content-card mb-3">
         <h6 class="fw-bold mb-2">Agendar recolección</h6>
-        <form action="/tickets/<%= ticket.id %>/schedule-collection" method="POST" class="d-flex gap-2">
-          <input type="datetime-local" name="collection_date" class="form-control form-control-sm"
-                 value="<%= ticket.collection_date ? new Date(ticket.collection_date).toISOString().slice(0,16) : '' %>" required />
-          <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
+        <form action="/tickets/<%= ticket.id %>/schedule-collection" method="POST">
+          <div class="mb-2">
+            <label class="form-label mb-1" style="font-size:0.8rem;">Fecha y hora</label>
+            <input type="datetime-local" name="collection_date" class="form-control form-control-sm" step="60"
+                   value="<%= ticket.collection_date ? new Date(ticket.collection_date).toISOString().slice(0,16) : '' %>" required />
+          </div>
+          <button type="submit" class="btn btn-secondary btn-sm w-100">Guardar</button>
         </form>
       </div>
       <% } %>
 
       <!-- Agendar devolución -->
-      <% if (['in_repair','finalized'].includes(ticket.status)) { %>
+      <% if (['in_repair','finalized','scheduled_return'].includes(ticket.status)) { %>
       <div class="content-card mb-3">
         <h6 class="fw-bold mb-2">Agendar devolución</h6>
-        <form action="/tickets/<%= ticket.id %>/schedule-return" method="POST" class="d-flex gap-2">
-          <input type="datetime-local" name="return_date" class="form-control form-control-sm"
-                 value="<%= ticket.return_date ? new Date(ticket.return_date).toISOString().slice(0,16) : '' %>" required />
-          <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
+        <form action="/tickets/<%= ticket.id %>/schedule-return" method="POST">
+          <div class="mb-2">
+            <label class="form-label mb-1" style="font-size:0.8rem;">Fecha y hora</label>
+            <input type="datetime-local" name="return_date" class="form-control form-control-sm" step="60"
+                   value="<%= ticket.return_date ? new Date(ticket.return_date).toISOString().slice(0,16) : '' %>" required />
+          </div>
+          <button type="submit" class="btn btn-secondary btn-sm w-100">Guardar</button>
         </form>
       </div>
       <% } %>

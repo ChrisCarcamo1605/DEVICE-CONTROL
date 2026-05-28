@@ -77,8 +77,9 @@
           <%= new Date(p.purchase_date).toLocaleDateString('es-HN') %>
         </td>
         <td style="font-size:0.82rem;"><%= p.manager_name %></td>
-        <td class="text-end">
-          <a href="/purchases/<%= p.id %>" class="action-link">Ver</a>
+        <td class="text-end" style="white-space:nowrap;">
+          <a href="/purchases/<%= p.id %>" class="action-link me-2">Ver</a>
+          <a href="/purchases/<%= p.id %>/edit" class="action-link">Editar</a>
         </td>
       </tr>
       <% }) %>
